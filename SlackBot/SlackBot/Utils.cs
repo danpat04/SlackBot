@@ -9,7 +9,7 @@ namespace SlackBot
             return $"<@{userId}>";
         }
 
-        private static readonly Regex UserIdPattern = new Regex(@"^<@(?<userId>[A-Z0-9]+)\|[a-zA-Z0-9' \.]+>$");
+        private static readonly Regex UserIdPattern = new Regex(@"^<@(?<userId>[A-Z0-9]+)\|[a-zA-Z0-9' \.\-]+>$");
 
         public static string StringToUserId(string text)
         {
