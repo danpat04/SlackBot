@@ -124,7 +124,12 @@ namespace SlackBot
             var request = new ChatPostMessageRequest(channelId, text);
             var response = await request.SendAsync(client);
 
-            _logger.LogInformation($"Sent message to {workspaceName}/{channelId} : {text}");
+            if (!response.Ok)
+            {
+                _logger.LogInformation($"Tried to send message to {workspaceName}/{channelId} : {text}");
+                _logger.LogError($"Sending failed: {response.Error}");
+            }
+
             return response.Msg;
         }
 
@@ -133,16 +138,11 @@ namespace SlackBot
             HttpClient client = CreateClient(workspaceName);
             var request = new ChatPostEphemeralMessageRequest(channelId, userId, text);
             var response = await request.SendAsync(client);
-            if (response.Ok)
+            if (!response.Ok)
             {
-                _logger.LogInformation("Sending success");
-            }
-            else
-            {
+                _logger.LogInformation($"Tried to send message to {workspaceName}/{channelId}/{userId} : {text}");
                 _logger.LogError($"Sending failed: {response.Error}");
             }
-            
-            _logger.LogInformation($"Sent ephemeral to {workspaceName}/{channelId}/{userId} : {text}");
         }
     }
 }
