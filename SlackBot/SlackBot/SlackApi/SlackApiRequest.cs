@@ -40,5 +40,8 @@ namespace SlackBot.SlackApi
     {
         [JsonPropertyName("ok")]
         public bool Ok { get; set; }
+        
+        [JsonPropertyName("error")]
+        public string Error { get; set; }
     }
 }
