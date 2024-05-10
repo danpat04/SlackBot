@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace SlackBot
 {
@@ -35,13 +36,15 @@ namespace SlackBot
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly SlackConfig _config;
+        private readonly ILogger _logger;
 
         private readonly Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
-        public SlackService(IHttpClientFactory clientFactory, IOptions<SlackConfig> config)
+        public SlackService(IHttpClientFactory clientFactory, IOptions<SlackConfig> config, ILogger<SlackService> logger)
         {
             _clientFactory = clientFactory;
             _config = config.Value;
+            _logger = logger;
         }
 
         public HttpClient CreateClient(string workspaceName)
@@ -121,6 +124,7 @@ namespace SlackBot
             var request = new ChatPostMessageRequest(channelId, text);
             var response = await request.SendAsync(client);
 
+            _logger.LogInformation($"Sent message to {workspaceName}/{channelId} : {text}");
             return response.Msg;
         }
 
@@ -129,6 +133,7 @@ namespace SlackBot
             HttpClient client = CreateClient(workspaceName);
             var request = new ChatPostEphemeralMessageRequest(channelId, userId, text);
             await request.SendAsync(client);
+            _logger.LogInformation($"Sent ephemeral to {workspaceName}/{channelId}/{userId} : {text}");
         }
     }
 }
