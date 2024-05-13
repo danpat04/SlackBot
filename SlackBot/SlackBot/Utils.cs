@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 namespace SlackBot
 {
@@ -10,16 +11,32 @@ namespace SlackBot
         }
 
         private static readonly Regex UserIdPattern = new Regex(@"^<@(?<userId>[A-Z0-9]+)\|[a-zA-Z0-9' \.\-]+>$");
+        private static readonly Regex PureIdPattern = new Regex(@"^@(?<userId>[A-Z0-9]+)$");
 
         public static string StringToUserId(string text)
         {
-            var matches = UserIdPattern.Matches(text);
+            if (TryGetUserId(text, UserIdPattern, out var userId) || TryGetUserId(text, PureIdPattern, out userId))
+            {
+                return userId;
+            }
+            
+            return null;
+        }
+
+        private static bool TryGetUserId(string text, Regex pattern, [NotNullWhen(true)] out string userId)
+        {
+            var matches = pattern.Matches(text);
             foreach (Match match in matches)
             {
                 if (match.Groups.TryGetValue("userId", out var value))
-                    return value.Value;
+                {
+                    userId = value.Value;
+                    return true;
+                }
             }
-            return null;
+
+            userId = null;
+            return false;
         }
     }
 }
